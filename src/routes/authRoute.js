@@ -1,7 +1,7 @@
 import express from "express";
 import { generateToken } from "../lib/utils.js";
-import { register, login } from "../controllers/auth.controller.js";
-import { logout } from "../controllers/auth.controller.js";
+import { register, login } from "../controllers/authController.js";
+import { logout } from "../controllers/authController.js";
 
 const router = express.Router();
 
