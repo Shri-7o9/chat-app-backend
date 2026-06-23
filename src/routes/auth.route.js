@@ -1,5 +1,5 @@
 import express from "express";
-import { generateToken } from "../libs/utils.js";
+import { generateToken } from "../lib/utils.js";
 import { register, login } from "../controllers/auth.controller.js";
 import { logout } from "../controllers/auth.controller.js";
 
