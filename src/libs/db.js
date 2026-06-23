@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-export const connectDB = async () => {
+export  const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
+    const mongoURI = process.env.MONGODB_URI;
 
     if (!mongoURI) {
       throw new Error("MongoDB URI is missing in .env file");
