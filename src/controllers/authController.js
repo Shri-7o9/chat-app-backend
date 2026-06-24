@@ -4,7 +4,7 @@ import { generateToken } from "../src/lib/utils.js";
 
 // SIGNUP USER
 
-export const register = async (req, res) => {
+export const signup = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
 
