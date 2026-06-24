@@ -1,6 +1,6 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
-import { generateToken } from "../src/lib/utils.js";
+import { generateToken } from "../libs/utils.js";
 
 // SIGNUP USER
 
