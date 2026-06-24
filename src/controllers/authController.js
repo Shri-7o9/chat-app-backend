@@ -2,7 +2,7 @@ import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
 
-// REGISTER USER
+// SIGNUP USER
 
 export const register = async (req, res) => {
   try {
@@ -12,7 +12,9 @@ export const register = async (req, res) => {
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({
+        message: "User already exists",
+      });
     }
 
     // hash password
@@ -23,28 +25,37 @@ export const register = async (req, res) => {
       fullName,
       email,
       password: hashedPassword,
+      profilePic: "",
     });
 
-    // generate JWT token (sets cookie)
-    generateToken(newUser._id, res);
+    // check if user created successfully
+    if (newUser) {
+      generateToken(newUser._id, res);
 
-    res.status(201).json({
-      success: true,
-      message: "User registered successfully",
-      user: {
-        _id: newUser._id,
-        fullName: newUser.fullName,
-        email: newUser.email,
-      },
+      return res.status(201).json({
+        message: "User registered successfully",
+        user: {
+          _id: newUser._id,
+          fullName: newUser.fullName,
+          email: newUser.email,
+          profilePic: newUser.profilePic,
+        },
+      });
+    }
+
+    return res.status(400).json({
+      message: "Failed to create user",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
-// =======================
+
 // LOGIN USER
-// =======================
+
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -53,36 +64,44 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
     }
 
-    // check password
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    // verify password
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!isPasswordCorrect) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
     }
 
-    // generate token
+    // generate JWT cookie
     generateToken(user._id, res);
 
     res.status(200).json({
-      success: true,
       message: "Login successful",
       user: {
         _id: user._id,
         fullName: user.fullName,
         email: user.email,
+        profilePic: user.profilePic,
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
-// =======================
 // LOGOUT USER
-// =======================
+
 export const logout = (req, res) => {
   try {
     res.cookie("jwt", "", {
@@ -91,10 +110,11 @@ export const logout = (req, res) => {
     });
 
     res.status(200).json({
-      success: true,
       message: "Logged out successfully",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
