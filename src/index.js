@@ -1,21 +1,25 @@
 import express from "express";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 
-import { connectDB }  from "./libs/db.js";
+import { connectDB } from "./libs/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
+
 app.use("/api/auth", authRoutes);
+app.use("/api/message", messageRoutes);
 
 connectDB().then(() => {
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`Server started on PORT: ${PORT}`);
-})}
-)
+  const PORT = process.env.PORT || 5001;
 
+  app.listen(PORT, () => {
+    console.log(`Server started on PORT: ${PORT}`);
+  });
+});

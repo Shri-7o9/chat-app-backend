@@ -1,14 +1,11 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
-import { generateToken } from "../src/lib/utils.js";
-
-// SIGNUP USER
+import { generateToken } from "../libs/utils.js";
 
 export const signup = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
 
-    // check if user already exists
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -17,10 +14,8 @@ export const signup = async (req, res) => {
       });
     }
 
-    // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // create user
     const newUser = await User.create({
       fullName,
       email,
@@ -28,7 +23,6 @@ export const signup = async (req, res) => {
       profilePic: "",
     });
 
-    // check if user created successfully
     if (newUser) {
       generateToken(newUser._id, res);
 
@@ -46,6 +40,7 @@ export const signup = async (req, res) => {
     return res.status(400).json({
       message: "Failed to create user",
     });
+
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -54,13 +49,10 @@ export const signup = async (req, res) => {
 };
 
 
-// LOGIN USER
-
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // find user
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -69,7 +61,6 @@ export const login = async (req, res) => {
       });
     }
 
-    // verify password
     const isPasswordCorrect = await bcrypt.compare(
       password,
       user.password
@@ -81,7 +72,6 @@ export const login = async (req, res) => {
       });
     }
 
-    // generate JWT cookie
     generateToken(user._id, res);
 
     res.status(200).json({
@@ -93,6 +83,7 @@ export const login = async (req, res) => {
         profilePic: user.profilePic,
       },
     });
+
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -100,7 +91,6 @@ export const login = async (req, res) => {
   }
 };
 
-// LOGOUT USER
 
 export const logout = (req, res) => {
   try {
@@ -112,6 +102,19 @@ export const logout = (req, res) => {
     res.status(200).json({
       message: "Logged out successfully",
     });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+
+export const checkAuth = async (req, res) => {
+  try {
+    res.status(200).json(req.user);
+
   } catch (error) {
     res.status(500).json({
       message: error.message,
