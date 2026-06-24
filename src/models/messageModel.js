@@ -20,7 +20,7 @@ const messageSchema = new mongoose.Schema(
     },
 
     image: {
-      type: String, // image URL
+      type: String, 
       default: "",
     },
   },

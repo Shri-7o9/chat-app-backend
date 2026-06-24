@@ -1,6 +1,5 @@
 export const signup = async (req, res) => {
   try {
-    res.send("sigup page");
     res.status(201).json({
       message: "Signup successful",
     });
