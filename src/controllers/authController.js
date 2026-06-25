@@ -49,8 +49,14 @@ export const signup = async (req, res) => {
       message: "Failed to create user",
     });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
+  console.log("Error in signup controller:", error);
+  console.log("",error);
+
+
+  res.status(500).json({
+    message: error.message,
+  });
+}
     });
   }
 };
@@ -104,6 +110,7 @@ export const login = async (req, res) => {
     };
 
   } catch (error) {
+    console.log('Error in login controller:', error);
     res.status(500).json({
       message: error.message,
     });
@@ -123,6 +130,7 @@ export const logout = (req, res) => {
       message: "Logged out successfully",
     });
   } catch (error) {
+    console.log("Error in logout controller;", error);
     res.status(500).json({
       message: error.message,
     });
