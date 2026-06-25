@@ -6,7 +6,7 @@ import { generateToken } from "../libs/utils.js";
 
 export const signup = async (req, res) => {
   try {
-    const { fullName, email, password } = req.body;
+    const { fullName, userName, email, password } = req.body;
 
     // check if user already exists
     const userExists = await User.findOne({ email });
@@ -23,6 +23,7 @@ export const signup = async (req, res) => {
     // create user
     const newUser = await User.create({
       fullName,
+      userName,
       email,
       password: hashedPassword,
       profilePic: "",
@@ -37,6 +38,7 @@ export const signup = async (req, res) => {
         user: {
           _id: newUser._id,
           fullName: newUser.fullName,
+          userName: newUser.userName,
           email: newUser.email,
           profilePic: newUser.profilePic,
         },
@@ -82,17 +84,25 @@ export const login = async (req, res) => {
     }
 
     // generate JWT cookie
-    generateToken(user._id, res);
+    if (user) {
+      // generate jwt token here
+      generateToken(user._id, res);
+      await user.save();
 
     res.status(200).json({
       message: "Login successful",
       user: {
         _id: user._id,
         fullName: user.fullName,
+        userName: user.userName,
         email: user.email,
         profilePic: user.profilePic,
       },
     });
+    } else {
+      res.status(400).json({ message: "Invalid user data" });
+    };
+
   } catch (error) {
     res.status(500).json({
       message: error.message,
