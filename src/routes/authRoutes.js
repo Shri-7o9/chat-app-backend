@@ -7,6 +7,7 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
+
 // Update Profile - fullName and userName
 router.put("/update-profile", protectRoute, updateProfile);
 
