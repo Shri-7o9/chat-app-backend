@@ -2,7 +2,7 @@ import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../libs/utils.js"
 import crypto from "crypto";
- import { generateResetToken } from "../libs/utils.js";
+import { generateResetToken } from "../libs/utils.js";
 
 
 // SIGNUP USER
@@ -75,7 +75,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // verify password
+    // verify password using bcrypt
     const isPasswordCorrect = await bcrypt.compare(
       password,
       user.password
