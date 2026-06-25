@@ -1,4 +1,3 @@
-import cookieParser from "cookie-parser";
 import messageRoutes from "./routes/messageRoutes.js";
 import express from "express";
 import mongoose from "mongoose";
