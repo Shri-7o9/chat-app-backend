@@ -84,7 +84,10 @@ export const login = async (req, res) => {
     }
 
     // generate JWT cookie
-    generateToken(user._id, res);
+    if (user) {
+      // generate jwt token here
+      generateToken(user._id, res);
+      await user.save();
 
     res.status(200).json({
       message: "Login successful",
@@ -96,6 +99,10 @@ export const login = async (req, res) => {
         profilePic: user.profilePic,
       },
     });
+    } else {
+      res.status(400).json({ message: "Invalid user data" });
+    };
+
   } catch (error) {
     res.status(500).json({
       message: error.message,
