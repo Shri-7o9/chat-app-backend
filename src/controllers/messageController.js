@@ -36,3 +36,24 @@ export const getMessages = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const sendMessage = async (req, res) => {
+  try {
+    const { id: receiverId } = req.params;
+    const senderId = req.user._id;
+    const { text } = req.body;
+
+    const newMessage = new Message({
+      senderId,
+      receiverId,
+      text,
+    });
+
+    await newMessage.save();
+
+    res.status(201).json(newMessage);
+  } catch (error) {
+    console.error("Error in sendMessage:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
