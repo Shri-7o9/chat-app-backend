@@ -53,9 +53,7 @@ export const signup = async (req, res) => {
     message: error.message,
   });
 }
-    });
-  }
-};
+    };
 
 // Login User
 export const login = async (req, res) => {
