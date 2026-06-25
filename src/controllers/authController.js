@@ -3,12 +3,10 @@ import bcrypt from "bcryptjs";
 import { generateToken } from "../libs/utils.js";
 
 // SIGNUP USER
-
 export const signup = async (req, res) => {
   try {
     const { fullName, userName, email, password } = req.body;
 
-    // check if user already exists
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -17,10 +15,8 @@ export const signup = async (req, res) => {
       });
     }
 
-    // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // create user
     const newUser = await User.create({
       fullName,
       userName,
@@ -29,7 +25,6 @@ export const signup = async (req, res) => {
       profilePic: "",
     });
 
-    // check if user created successfully
     if (newUser) {
       generateToken(newUser._id, res);
 
@@ -48,21 +43,23 @@ export const signup = async (req, res) => {
     return res.status(400).json({
       message: "Failed to create user",
     });
+
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
+  console.log("Error in authController signup", error);
+  console.log("",error);
 
 
-// LOGIN USER
+  res.status(500).json({
+    message: error.message,
+  });
+}
+}
 
+// Login User
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // find user
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -71,7 +68,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // verify password
+    // verify password using bcrypt
     const isPasswordCorrect = await bcrypt.compare(
       password,
       user.password
@@ -104,14 +101,14 @@ export const login = async (req, res) => {
     };
 
   } catch (error) {
+    console.log('Error in login controller:', error);
     res.status(500).json({
       message: error.message,
     });
   }
 };
 
-// LOGOUT USER
-
+// Logout User
 export const logout = (req, res) => {
   try {
     res.cookie("jwt", "", {
@@ -122,6 +119,19 @@ export const logout = (req, res) => {
     res.status(200).json({
       message: "Logged out successfully",
     });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// Check Authentication
+export const checkAuth = async (req, res) => {
+  try {
+    res.status(200).json(req.user);
+
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -190,6 +200,7 @@ export const updateProfile = async (req, res) => {
       user: updatedUser,
     });
   } catch (error) {
+    console.log("Error in logout controller;", error);
     res.status(500).json({
       message: error.message,
     });
