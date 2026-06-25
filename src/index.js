@@ -2,7 +2,8 @@ import cookieParser from "cookie-parser";
 import messageRoutes from "./routes/messageRoutes.js";
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
+import dotenv, { parse } from "dotenv";
+import cookieParser from "cookie-parser";
 
 import { connectDB }  from "./libs/db.js";
 import authRoutes from "./routes/authRoutes.js";
