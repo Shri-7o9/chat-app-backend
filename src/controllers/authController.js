@@ -49,7 +49,7 @@ export const signup = async (req, res) => {
       message: "Failed to create user",
     });
   } catch (error) {
-  console.log("Error in signup controller:", error);
+  console.log("Error in authController signup", error);
   console.log("",error);
 
 
