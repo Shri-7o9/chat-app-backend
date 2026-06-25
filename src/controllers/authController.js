@@ -6,7 +6,7 @@ import { generateToken } from "../libs/utils.js";
 
 export const signup = async (req, res) => {
   try {
-    const { fullName, email, password } = req.body;
+    const { fullName, userName, email, password } = req.body;
 
     // check if user already exists
     const userExists = await User.findOne({ email });
@@ -23,6 +23,7 @@ export const signup = async (req, res) => {
     // create user
     const newUser = await User.create({
       fullName,
+      userName,
       email,
       password: hashedPassword,
       profilePic: "",
@@ -37,6 +38,7 @@ export const signup = async (req, res) => {
         user: {
           _id: newUser._id,
           fullName: newUser.fullName,
+          userName: newUser.userName,
           email: newUser.email,
           profilePic: newUser.profilePic,
         },
@@ -89,6 +91,7 @@ export const login = async (req, res) => {
       user: {
         _id: user._id,
         fullName: user.fullName,
+        userName: user.userName,
         email: user.email,
         profilePic: user.profilePic,
       },
@@ -126,9 +129,9 @@ export const updateProfile = async (req, res) => {
     const userId = req.user._id; // set by protectRoute middleware
 
     // "ntg send reject" -> Reject if no fields are provided in request body
-    if (!fullName && !email) {
+    if (!fullName && !userName) {
       return res.status(400).json({
-        message: "Please provide at least one field to update (fullName or email)",
+        message: "Please provide at least one field to update (fullName or userName)",
       });
     }
 
@@ -144,22 +147,22 @@ export const updateProfile = async (req, res) => {
       updateFields.fullName = fullName.trim();
     }
 
-    // 3. "check not empty-unique" -> If email is provided, ensure it is not empty and is unique
-    if (email !== undefined) {
-      if (!email.trim()) {
+    // 3. "check not empty-unique" -> If userName is provided, ensure it is not empty and is unique
+    if (userName !== undefined) {
+      if (!userName.trim()) {
         return res.status(400).json({
-          message: "Email cannot be empty",
+          message: "User name cannot be empty",
         });
       }
-      
-      // Check if the email is already in use by another user
-      const existingUser = await User.findOne({ email: email.trim() });
+
+      // Check if the userName is already in use by another user
+      const existingUser = await User.findOne({ userName: userName.trim() });
       if (existingUser && existingUser._id.toString() !== userId.toString()) {
         return res.status(400).json({
-          message: "Email is already taken by another user",
+          message: "User name is already taken by another user",
         });
       }
-      updateFields.email = email.trim();
+      updateFields.userName = userName.trim();
     }
 
     // Update user in DB and select all fields except password (".select('-password')")
