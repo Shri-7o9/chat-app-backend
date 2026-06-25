@@ -45,8 +45,14 @@ export const signup = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
+  console.log("Error in authController signup", error);
+  console.log("",error);
+
+
+  res.status(500).json({
+    message: error.message,
+  });
+}
     });
   }
 };
@@ -96,6 +102,7 @@ export const login = async (req, res) => {
     };
 
   } catch (error) {
+    console.log('Error in login controller:', error);
     res.status(500).json({
       message: error.message,
     });
@@ -194,6 +201,7 @@ export const updateProfile = async (req, res) => {
       user: updatedUser,
     });
   } catch (error) {
+    console.log("Error in logout controller;", error);
     res.status(500).json({
       message: error.message,
     });
