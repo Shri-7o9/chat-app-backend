@@ -35,7 +35,7 @@ export const login = async (req, res) => {
     }
 
     // 4. Generate JWT token
-    const token = generateToken(user._id);
+   // const token = generateToken(user._id);
 
     // 5. Send response
     return res.status(200).json({
