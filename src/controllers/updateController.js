@@ -4,8 +4,12 @@ export const updateUser = async (req, res) => {
   try {
     const { firstName, lastName } = req.body;
 
+    const user = await User.findOne({ email })
+    
+    const userId = req.user._id;
+
     const updatedUser = await User.findByIdAndUpdate(
-      req.userId,
+      userId,
       {
         firstName,
         lastName,
