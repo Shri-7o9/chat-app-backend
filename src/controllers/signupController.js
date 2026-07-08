@@ -1,17 +1,23 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import sendMail from "../libs/sendMail.js";
+import { generateVerificationToken } from "../libs/utils.js";
 
+
+// Signup Controller
 export const signup = async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, userName, email, password } = req.body;
 
+    // Validate fields
     if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({
         message: "All fields are required",
       });
     }
 
+
+    // Check existing user
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -20,49 +26,189 @@ export const signup = async (req, res) => {
       });
     }
 
+
+    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+
+    // Generate email verification token
+    const { token, expire } = generateVerificationToken();
+
+
+    // Create new user
     const newUser = new User({
       firstName,
       lastName,
+      userName,
       email,
       password: hashedPassword,
+
+      isVerified: false,
+      verificationToken: token,
+      verificationTokenExpires: expire,
     });
+
 
     await newUser.save();
 
+
+
+    // Send verification email
     try {
+      console.log("Sending mail to:", newUser.email);
+      console.log("Mail sent successfully");
       await sendMail({
         email: newUser.email,
-        subject: "Welcome to ChatApp! 🎉",
+        subject: "Verify your ChatApp Account",
+
         html: `
-          <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-            <h2 style="color: #4f46e5; text-align: center;">Welcome to ChatApp, ${firstName}! 🎉</h2>
-            <p>Hi ${firstName},</p>
-            <p>Thank you for signing up for ChatApp! We're excited to have you on board.</p>
-            <p>You can now start messaging your friends and colleagues in real-time.</p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="#" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Get Started</a>
-            </div>
-            <p>If you have any questions, feel free to reply to this email.</p>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-            <p style="font-size: 12px; color: #777; text-align: center;">&copy; 2026 ChatApp. All rights reserved.</p>
-          </div>
+        <div style="
+          font-family: Arial;
+          max-width:600px;
+          margin:auto;
+          padding:20px;
+          border:1px solid #ddd;
+          border-radius:10px;
+        ">
+
+          <h2>Hello ${firstName} 👋</h2>
+
+          <p>
+            Welcome to ChatApp!
+          </p>
+
+          <p>
+            Please verify your email address by clicking the button below.
+          </p>
+
+
+          <a href="http://localhost:5001/api/auth/verify/${token}"
+          style="
+          background:#4f46e5;
+          color:white;
+          padding:12px 20px;
+          text-decoration:none;
+          border-radius:5px;
+          display:inline-block;
+          ">
+          Verify Email
+          </a>
+
+
+          <p>
+          This verification link expires in 24 hours.
+          </p>
+
+
+          <br>
+
+          <p>
+          Thanks,<br>
+          ChatApp Team
+          </p>
+
+        </div>
         `,
       });
+
+
     } catch (mailError) {
-      console.error("Failed to send welcome email:", mailError.message);
+
+      console.log("Mail sending failed:", mailError.message);
+
     }
 
-    res.status(201).json({
-      message: "User created successfully",
-    });
-  } catch (error) {
-    console.log(error);
 
-    res.status(500).json({
-      message: "Internal Server Error",
+
+    return res.status(201).json({
+
+      message:
+        "User registered successfully. Please verify your email.",
+
     });
+
+
+
+  } catch (error) {
+
+    console.log("Signup Error:", error.message);
+
+    return res.status(500).json({
+
+      message: error.message,
+
+    });
+
   }
+
+};
+
+
+
+
+// Email Verification Controller
+export const verifyEmail = async (req, res) => {
+
+  try {
+
+    const { token } = req.params;
+
+
+    const user = await User.findOne({
+
+      verificationToken: token,
+
+      verificationTokenExpires: {
+        $gt: Date.now(),
+      },
+
+    });
+
+
+
+    if (!user) {
+
+      return res.status(400).json({
+
+        message: "Invalid or expired verification link",
+
+      });
+
+    }
+
+
+
+    user.isVerified = true;
+
+    user.verificationToken = undefined;
+
+    user.verificationTokenExpires = undefined;
+
+
+    await user.save();
+
+
+
+    return res.status(200).json({
+
+      message: "Email verified successfully",
+
+    });
+
+
+
+  } catch (error) {
+
+    console.log("Verification Error:", error.message);
+
+
+    return res.status(500).json({
+
+      message: "Internal Server Error",
+
+    });
+
+  }
+
 };
