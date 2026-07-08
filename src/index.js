@@ -11,11 +11,10 @@ dotenv.config();
 const app = express();
 
 const front_url = "http://localhost:5173"
-if(process.env.NODE_ENV !== "production"){
+
 app.use(cors({
     origin: front_url
 }))
-}
 
 app.use(express.json());
 app.use(cookieParser());
