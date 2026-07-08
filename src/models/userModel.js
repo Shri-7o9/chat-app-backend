@@ -2,15 +2,14 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    fullName: {
+    firstName: {
       type: String,
       required: [true, "Full name is required"],
       trim: true,
     },
 
-    userName: {
+    lastName: {
       type: String,
-      unique: true,
       required: [true, "User name is required"],
       trim: true
     },
@@ -28,10 +27,10 @@ const userSchema = new mongoose.Schema(
       minlength: [6, "Password must be at least 6 characters"],
     },
 
-    profilePic: {
-      type: String,
-      default: "",
-    },
+    // profilePic: {
+    //   type: String,
+    //   default: "",
+    // },
 
     resetPasswordToken: {
       type: String,
