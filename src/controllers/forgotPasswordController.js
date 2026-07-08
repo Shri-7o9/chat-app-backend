@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import User from "../models/userModel.js";
 import sendMail from "../libs/sendMail.js";
+import { log } from "console";
 
 export const forgotPassword = async (req, res) => {
   try {
@@ -33,6 +34,8 @@ export const forgotPassword = async (req, res) => {
 
     // Reset URL
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+    res.status(200).json({message: resetUrl})
+    
 
     // Send email
     await sendMail({
