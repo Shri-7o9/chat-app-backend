@@ -5,7 +5,7 @@ export const updateUser = async (req, res) => {
     const { firstName, lastName } = req.body;
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
+      req.userId,
       {
         firstName,
         lastName,

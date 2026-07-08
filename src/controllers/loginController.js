@@ -35,7 +35,7 @@ export const login = async (req, res) => {
     }
 
     // 4. Generate JWT token
-   // const token = generateToken(user._id);
+    const token = generateToken(user._id, res);
 
     // 5. Send response
     return res.status(200).json({
@@ -44,9 +44,8 @@ export const login = async (req, res) => {
       token,
       user: {
         id: user._id,
-        fullName: user.fullName,
+        fullName: `${user.firstName} ${user.lastName}`,
         email: user.email,
-    
       },
     });
   } catch (error) {
