@@ -17,12 +17,15 @@ router.post("/signup", signup);
 router.post("/login", loginUser);
 
 router.post("/logout", protectRoute, logoutUser);
+
 router.put("/update", protectRoute, updateUser);
 
 router.get("/verify/:token", verifyEmail);
 
 router.post("/forgotPassword", forgotPassword);
 router.post("/resetPassword/:token", resetPassword);
+
+router.post("/signup", signup);
 
 export default router;
 
