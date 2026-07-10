@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import User from "../models/userModel.js";
-import { generateToken } from "../libs/utils.js";
+import { generateVerificationToken} from "../libs/utils.js";
 
 export const login = async (req, res) => {
   try {
@@ -23,6 +23,11 @@ export const login = async (req, res) => {
         message: "Invalid email or password",
       });
     }
+    if (!user.isVerified) {
+  return res.status(401).json({
+    message: "Please verify your email first.",
+  });
+}
 
     // 3. Compare password
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
