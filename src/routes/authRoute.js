@@ -18,4 +18,6 @@ router.put("/update-profile", protectRoute, updateUser);
 router.post("/reset-password/:token", resetPassword);
 router.post("/forget-password", forgotPassword);
 
+router.get("/check", protectRoute, (req, res) => res.status(200).json(req.user));
+
 export default router;
