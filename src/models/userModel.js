@@ -31,6 +31,16 @@ const userSchema = new mongoose.Schema(
     resetPasswordExpires: {
       type: Date,
     },
+//added new lines for profile picture and cloudinary ID
+    profilePic: {
+  type: String,
+  default: "",
+},
+cloudinaryId: {
+  type: String,
+  default: "",
+},
+
   },
   {
     timestamps: true,

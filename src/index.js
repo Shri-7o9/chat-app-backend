@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import authRoute from "./routes/authRoute.js";
 import messageRoutes from "./routes/messageRoutes.js";
+import userRoutes from "./routes/userRoute.js"; //added
+
 
 dotenv.config();
 
@@ -13,9 +15,11 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+
 app.use("/api/auth",authRoute);
 app.use("/api/messages", messageRoutes);
 
+app.use("/api/user", userRoutes); //added
 
 app.listen(process.env.PORT, () => {
     connectDB();
