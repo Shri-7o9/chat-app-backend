@@ -7,7 +7,6 @@ import { forgotPassword } from "../controllers/forgotPasswordController.js";
 import { resetPassword } from "../controllers/resetPasswordController.js";
 import { updateUser } from "../controllers/updateController.js";
 import { checkAuth } from "../controllers/checkController.js";
-
 import { verifyEmail } from "../controllers/authController.js";
 
 import { protectRoute } from "../middleware/authMiddleware.js";
@@ -32,6 +31,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 
 
+// Check authentication
 router.get("/check", protectRoute, checkAuth);
 
 

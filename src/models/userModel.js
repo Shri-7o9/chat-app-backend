@@ -33,11 +33,21 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
+    // Email verification
     verificationToken: {
       type: String,
     },
 
     verificationTokenExpires: {
+      type: Date,
+    },
+
+    // Password reset
+    resetPasswordToken: {
+      type: String,
+    },
+
+    resetPasswordExpires: {
       type: Date,
     },
   },

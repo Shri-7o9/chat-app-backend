@@ -3,7 +3,7 @@ import User from "../models/userModel.js";
 
 export const protectRoute = async (req, res, next) => {
   try {
-    const token = req.cookies.token;
+    const token = req.cookies.jwt;
 
     if (!token) {
       return res.status(401).json({
@@ -12,28 +12,37 @@ export const protectRoute = async (req, res, next) => {
       });
     }
 
+
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET
     );
 
-    const user = await User.findById(decoded.id);
+
+    const user = await User.findById(decoded.userId).select("-password");
+
 
     if (!user) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
 
+
     req.user = user;
+    req.userId = user._id;
 
     next();
 
   } catch (error) {
+
+    console.log(error.message);
+
     return res.status(401).json({
       success: false,
       message: "Invalid token",
     });
+
   }
 };

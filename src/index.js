@@ -23,8 +23,10 @@ const io = new Server(server, {
   },
 });
 
+
 app.use(express.json());
 app.use(cookieParser());
+
 
 app.use(
   cors({
@@ -33,15 +35,17 @@ app.use(
   })
 );
 
+
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
+
+
+const PORT = process.env.PORT || 5001;
 
 
 // Initialize Socket.IO
 setupSocket(io);
 
-
-const PORT = process.env.PORT || 5001;
 
 connectDB().then(() => {
   server.listen(PORT, () => {
