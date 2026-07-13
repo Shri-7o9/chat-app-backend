@@ -33,7 +33,7 @@ export const forgotPassword = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Reset URL
-    const resetUrl = `http://localhost:5001/api/reset-password/${token}`;
+    const resetUrl = `/reset-password/${token}`;
     res.status(200).json(resetUrl)
     
 
