@@ -11,17 +11,17 @@ export const updateUser = async (req, res) => {
         lastName,
       },
       {
-        new: true,
-      },
+        returnDocument: "after",
+      }
     );
 
-    res.status(200).json({
-      message: "User updated successfully",
-      user: updatedUser,
-    });
+    res.status(200).json(updatedUser);
+
   } catch (error) {
+
     res.status(500).json({
       message: error.message,
     });
+
   }
 };
