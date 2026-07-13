@@ -5,11 +5,4 @@ import { protectRoute } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.put(
-  "/update-profile",
-  protectRoute,
-  upload.single("profilePic"),
-  updateUser
-);
-
 export default router;
