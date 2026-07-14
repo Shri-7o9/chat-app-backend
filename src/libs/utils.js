@@ -10,7 +10,8 @@ export const generateToken = (userId, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000, 
     httpOnly: true, // Prevents XSS attacks (cookie cannot be accessed via client-side JavaScript)
     sameSite: "strict", // Protects against CSRF attacks
-    secure: process.env.NODE_ENV !== "development", // Only sends cookie over HTTPS in production
+    secure: false, 
+    // process.env.NODE_ENV !== "development", // Only sends cookie over HTTPS in production
   });
 
   return token;
