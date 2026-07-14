@@ -24,6 +24,17 @@ const messageSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    isForwarded: {
+      type: Boolean,
+      default: false,
+    },
+
+    forwardedFrom: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
   },
   {
     timestamps: true,

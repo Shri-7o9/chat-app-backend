@@ -22,6 +22,14 @@ export const setupSocket = (io) => {
         socket.on("disconnect",()=>{
             console.log("User disconnected:", socket.id);
         });
+        socket.on("forwardMessage",(messages)=>{
+    console.log("Forwarding messages:", messages);
+
+    messages.forEach((message) => {
+        io.to(message.receiverId)
+          .emit("newMessage", message);
+    });
+});
 
     });
 
