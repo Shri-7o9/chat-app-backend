@@ -17,7 +17,7 @@ router.post("/logout", protectRoute, logoutUser);
 router.put("/update-profile", protectRoute, updateUser);
 
 router.put(
-  "/update-profile",
+  "/update-profile-pic",
   protectRoute,
   upload.single("profilePic"),
   updateUser
