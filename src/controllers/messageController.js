@@ -60,3 +60,39 @@ export const sendMessage = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const editMessage = async (req, res) => {
+  try {
+    const { id: messageId } = req.params;
+    const { text } = req.body;
+    const myId = req.userId;
+
+    if (!text) {
+      return res.status(400).json({ error: "Text is required to edit the message" });
+    }
+
+    // Find the message
+    const message = await Message.findById(messageId);
+
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
+
+    // Check if the requester is the sender
+    if (message.senderId.toString() !== myId) {
+      return res.status(403).json({ error: "Unauthorized to edit this message" });
+    }
+
+    // Update fields
+    message.text = text;
+    message.isEdited = true;
+
+    await message.save();
+
+    res.status(200).json(message);
+  } catch (error) {
+    console.error("Error in editMessage: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
