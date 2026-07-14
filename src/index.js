@@ -5,10 +5,13 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import authRoute from "./routes/authRoute.js";
 import messageRoutes from "./routes/messageRoutes.js";
+import userRoutes from "./routes/userRoute.js"; //added
+
 
 dotenv.config();
 
 const app = express();
+
 
 app.use(express.json());
 app.use(cookieParser());
@@ -23,6 +26,7 @@ app.use(
 app.use("/api/auth",authRoute);
 app.use("/api/messages", messageRoutes);
 
+app.use("/api/user", userRoutes); //added
 
 connectDB().then(() => {
   const PORT = process.env.PORT || 5001;
@@ -30,4 +34,3 @@ connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`Server started on PORT: ${PORT}`);
   });
-});

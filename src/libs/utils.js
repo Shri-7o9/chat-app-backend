@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 
-// Generates token and sets it in an HttpOnly cookie
 export const generateToken = (userId, res) => {
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: "7d",
@@ -16,3 +15,5 @@ export const generateToken = (userId, res) => {
 
   return token;
 };
+
+

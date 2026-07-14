@@ -16,6 +16,14 @@ router.post("/signup", signup);
 router.post("/logout", protectRoute, logoutUser);
 router.put("/update-profile", protectRoute, updateUser);
 
+router.put(
+  "/update-profile-pic",
+  protectRoute,
+  upload.single("profilePic"),
+  updateUser
+);
+
+
 router.post("/reset-password/:token", resetPassword);
 router.post("/forget-password", forgotPassword);
 
