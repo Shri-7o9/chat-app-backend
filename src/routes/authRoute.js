@@ -1,13 +1,12 @@
 import express from "express";
 
-import { signup } from "../controllers/signupController.js";
+import { signup, verifyEmail } from "../controllers/signupController.js";
 import { login } from "../controllers/loginController.js";
 import { logoutUser } from "../controllers/logoutController.js";
 import { forgotPassword } from "../controllers/forgotPasswordController.js";
 import { resetPassword } from "../controllers/resetPasswordController.js";
 import { updateUser } from "../controllers/updateController.js";
 import { checkAuth } from "../controllers/checkController.js";
-import { verifyEmail } from "../controllers/authController.js";
 
 import { protectRoute } from "../middleware/authMiddleware.js";
 

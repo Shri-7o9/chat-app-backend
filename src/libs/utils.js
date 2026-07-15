@@ -31,3 +31,18 @@ export const generateVerificationToken = () => {
     expire,
   };
 };
+
+
+// Encodes the pending signup data (not yet saved to DB) into a signed JWT.
+// The token itself carries everything needed to create the user later,
+// so nothing is written to the database until the link is clicked.
+export const generateSignupToken = (payload) => {
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: "24h",
+  });
+};
+
+// Decodes/validates a signup token. Throws if invalid or expired.
+export const verifySignupToken = (token) => {
+  return jwt.verify(token, process.env.JWT_SECRET);
+};

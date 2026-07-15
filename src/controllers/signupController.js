@@ -1,7 +1,7 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import sendMail from "../libs/sendMail.js";
-import { generateVerificationToken } from "../libs/utils.js";
+import { generateSignupToken, verifySignupToken } from "../libs/utils.js";
 
 
 // Signup Controller
@@ -32,34 +32,24 @@ export const signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
 
-    // Generate email verification token
-    const { token, expire } = generateVerificationToken();
-
-
-    // Create new user
-    const newUser = new User({
+    // Encode the signup data itself into a signed, expiring token.
+    // IMPORTANT: no User document is created here. Nothing is saved to
+    // the database until the user actually clicks the verification link,
+    // so an unverified signup never persists as isVerified: false.
+    const token = generateSignupToken({
       firstName,
       lastName,
       userName,
       email,
       password: hashedPassword,
-
-      isVerified: false,
-      verificationToken: token,
-      verificationTokenExpires: expire,
     });
-
-
-    await newUser.save();
-
 
 
     // Send verification email
     try {
-      console.log("Sending mail to:", newUser.email);
-      console.log("Mail sent successfully");
+      console.log("Sending mail to:", email);
       await sendMail({
-        email: newUser.email,
+        email,
         subject: "Verify your ChatApp Account",
 
         html: `
@@ -112,7 +102,6 @@ export const signup = async (req, res) => {
         `,
       });
 
-
     } catch (mailError) {
 
       console.log("Mail sending failed:", mailError.message);
@@ -120,14 +109,10 @@ export const signup = async (req, res) => {
     }
 
 
-
     return res.status(201).json({
-
       message:
         "User registered successfully. Please verify your email.",
-
     });
-
 
 
   } catch (error) {
@@ -135,9 +120,7 @@ export const signup = async (req, res) => {
     console.log("Signup Error:", error.message);
 
     return res.status(500).json({
-
       message: error.message,
-
     });
 
   }
@@ -148,65 +131,60 @@ export const signup = async (req, res) => {
 
 
 // Email Verification Controller
+// This is the ONLY place a User document gets created for a new signup.
+// If the token is invalid/expired, or the user never clicks the link,
+// nothing was ever written to the database.
 export const verifyEmail = async (req, res) => {
 
   try {
 
     const { token } = req.params;
 
+    let decoded;
 
-    const user = await User.findOne({
-
-      verificationToken: token,
-
-      verificationTokenExpires: {
-        $gt: Date.now(),
-      },
-
-    });
-
-
-
-    if (!user) {
-
+    try {
+      decoded = verifySignupToken(token);
+    } catch (err) {
       return res.status(400).json({
-
         message: "Invalid or expired verification link",
-
       });
-
     }
 
+    const { firstName, lastName, userName, email, password } = decoded;
 
+    // Guard against the link being clicked twice, or a second signup
+    // completing verification for an email that already exists.
+    const userExists = await User.findOne({ email });
 
-    user.isVerified = true;
+    if (userExists) {
+      return res.status(400).json({
+        message: "User already verified",
+      });
+    }
 
-    user.verificationToken = undefined;
-
-    user.verificationTokenExpires = undefined;
-
-
-    await user.save();
-
-
-
-    return res.status(200).json({
-
-      message: "Email verified successfully",
-
+    // Only now — after verification — do we save anything to the DB,
+    // and we save it already verified.
+    const newUser = new User({
+      firstName,
+      lastName,
+      userName,
+      email,
+      password,
+      isVerified: true,
     });
 
+    await newUser.save();
 
+    return res.status(200).json({
+      message: "Email verified successfully",
+    });
 
   } catch (error) {
 
     console.log("Verification Error:", error.message);
 
-
     return res.status(500).json({
-
       message: "Internal Server Error",
-
     });
 
   }
