@@ -9,11 +9,15 @@ import { connectDB } from "./libs/db.js";
 import authRoutes from "./routes/authRoute.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import { setupSocket } from "./socket/socket.js";
+import userRoutes from "./routes/userRoute.js"; //added
+
+dev-final
 
 dotenv.config();
 
 const app = express();
 
+feature/complete-merge
 const server = createServer(app);
 
 const io = new Server(server, {
@@ -23,6 +27,7 @@ const io = new Server(server, {
   },
 });
 
+ dev-final
 
 app.use(express.json());
 app.use(cookieParser());
@@ -39,6 +44,7 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
+app.use("/api/user", userRoutes); //added
 
 const PORT = process.env.PORT || 5001;
 
@@ -51,4 +57,3 @@ connectDB().then(() => {
   server.listen(PORT, () => {
     console.log(`Server running on PORT: ${PORT}`);
   });
-});
