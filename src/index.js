@@ -1,33 +1,69 @@
-import dotenv from "dotenv";
 import express from "express";
-import cors from "cors";
+feature/complete-merge
+import dotenv from "dotenv"; dev-final
 import cookieParser from "cookie-parser";
-import connectDB from "./config/db.js";
-import authRoute from "./routes/authRoute.js";
+import cors from "cors";
+import { createServer } from "http";
+import { Server } from "socket.io";
+
+import { connectDB } from "./libs/db.js";
+import authRoutes from "./routes/authRoute.js";
 import messageRoutes from "./routes/messageRoutes.js";
+import { setupSocket } from "./socket/socket.js";
+import userRoutes from "./routes/userRoute.js"; //added
+
+dev-final
 
 dotenv.config();
 
 const app = express();
 
+feature/complete-merge
+const server = createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true,
+  },
+});
+
+ dev-final
+
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(
-    cors({
-        origin: "http://localhost:5173",
-        credentials: true
-    })
-)
+feature/complete-merge
 
-app.use("/api/auth",authRoute);
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+dev-final
+
+app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
+
+app.use("/api/user", userRoutes); //added
+
+ feature/complete-merge
+const PORT = process.env.PORT || 5001;
+
+
+// Initialize Socket.IO
+setupSocket(io);
 
 
 connectDB().then(() => {
-  const PORT = process.env.PORT || 5001;
-
-  app.listen(PORT, () => {
-    console.log(`Server started on PORT: ${PORT}`);
+  server.listen(PORT, () => {
+    console.log(`Server running on PORT: ${PORT}`);
   });
+
+app.listen(process.env.PORT, () => {
+    connectDB();
+  console.log(`Server running on port ${process.env.PORT}`);
 });
+dev-final

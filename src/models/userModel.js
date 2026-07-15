@@ -1,15 +1,21 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
-    firstName: {
+    fullName: {
       type: String,
       required: true,
     },
 
-    lastName: {
+    userName: {
       type: String,
       required: true,
+      unique:true,
+    },
+
+    userName: {
+      type: String,
     },
 
     email: {
@@ -21,9 +27,23 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 6,
     },
 
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Email verification
+    verificationToken: {
+      type: String,
+    },
+
+    verificationTokenExpires: {
+      type: Date,
+    },
+
+    // Password reset
     resetPasswordToken: {
       type: String,
     },
@@ -31,6 +51,16 @@ const userSchema = new mongoose.Schema(
     resetPasswordExpires: {
       type: Date,
     },
+//added new lines for profile picture and cloudinary ID
+    profilePic: {
+  type: String,
+  default: "",
+},
+cloudinaryId: {
+  type: String,
+  default: "",
+},
+
   },
   {
     timestamps: true,
@@ -38,7 +68,12 @@ const userSchema = new mongoose.Schema(
 );
 
 
-const User = mongoose.model("User", userSchema);
+// Password compare method
+userSchema.methods.comparePassword = async function(password) {
+  return await bcrypt.compare(password, this.password);
+};
 
+
+const User = mongoose.model("User", userSchema);
 
 export default User;

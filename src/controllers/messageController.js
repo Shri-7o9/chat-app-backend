@@ -4,15 +4,17 @@ import Message from "../models/messageModel.js";
 export const getUsersForSidebar = async (req, res) => {
   try {
     const loggedInUserId = req.userId;
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
+
+    const filteredUsers = await User.find({
+      _id: { $ne: loggedInUserId },
+    }).select("-password");
 
     res.status(200).json(filteredUsers);
   } catch (error) {
-    console.error("Error in getUsersForSidebar: ", error.message);
+    console.error("Error in getUsersForSidebar:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 export const getMessages = async (req, res) => {
   try {
@@ -28,7 +30,40 @@ export const getMessages = async (req, res) => {
 
     res.status(200).json(messages);
   } catch (error) {
-    console.error("Error in getMessages: ", error.message);
+    console.error("Error in getMessages:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};export const forwardMessage = async (req, res) => {
+  try {
+    const { id: messageId } = req.params;
+    const { receiverIds } = req.body;
+    const senderId = req.userId;
+
+    if (!Array.isArray(receiverIds) || receiverIds.length === 0) {
+      return res.status(400).json({ error: "receiverIds must be a non-empty array" });
+    }
+
+    const originalMessage = await Message.findById(messageId);
+
+    if (!originalMessage) {
+      return res.status(404).json({ error: "Original message not found" });
+    }
+
+    const forwardedMessages = await Promise.all(
+      receiverIds.map((receiverId) =>
+        new Message({
+          senderId,
+          receiverId,
+          text: originalMessage.text,
+          image: originalMessage.image,
+          isForwarded: true,
+          forwardedFrom: originalMessage._id,
+        }).save()
+      )
+    );
+    res.status(201).json(forwardedMessages);
+  } catch (error) {
+    console.error("Error in forwardMessage:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -39,24 +74,18 @@ export const sendMessage = async (req, res) => {
     const { id: receiverId } = req.params;
     const senderId = req.userId;
 
-    let imageUrl;
-    if (image) {
-  
-      imageUrl = image; 
-    }
-
     const newMessage = new Message({
       senderId,
       receiverId,
       text,
-      image: imageUrl,
+      image: image || "",
     });
 
     await newMessage.save();
 
     res.status(201).json(newMessage);
   } catch (error) {
-    console.error("Error in sendMessage: ", error.message);
+    console.error("Error in sendMessage:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

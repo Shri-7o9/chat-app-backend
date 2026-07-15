@@ -7,20 +7,38 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
     receiverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+
     text: {
       type: String,
       required: true,
       trim: true,
     },
+
+    image: {
+      type: String,
+      default: "",
+    },
+
+    isForwarded: {
+      type: Boolean,
+      default: false,
+    },
+
+    forwardedFrom: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 const Message = mongoose.model("Message", messageSchema);
