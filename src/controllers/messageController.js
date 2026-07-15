@@ -1,19 +1,26 @@
 import User from "../models/userModel.js";
 import Message from "../models/messageModel.js";
 
+// Get all users except the logged-in user
 export const getUsersForSidebar = async (req, res) => {
   try {
     const loggedInUserId = req.userId;
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
+
+    const filteredUsers = await User.find({
+      _id: { $ne: loggedInUserId },
+    }).select("-password");
 
     res.status(200).json(filteredUsers);
   } catch (error) {
-    console.error("Error in getUsersForSidebar: ", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error in getUsersForSidebar:", error.message);
+
+    res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 
-
+// Get all messages between logged-in user and another user
 export const getMessages = async (req, res) => {
   try {
     const { id: userToChatId } = req.params;
@@ -21,28 +28,38 @@ export const getMessages = async (req, res) => {
 
     const messages = await Message.find({
       $or: [
-        { senderId: myId, receiverId: userToChatId },
-        { senderId: userToChatId, receiverId: myId },
+        {
+          senderId: myId,
+          receiverId: userToChatId,
+        },
+        {
+          senderId: userToChatId,
+          receiverId: myId,
+        },
       ],
     });
 
     res.status(200).json(messages);
   } catch (error) {
-    console.error("Error in getMessages: ", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error in getMessages:", error.message);
+
+    res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 
+// Send a message
 export const sendMessage = async (req, res) => {
   try {
     const { text, image } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.userId;
 
-    let imageUrl;
+    let imageUrl = "";
+
     if (image) {
-  
-      imageUrl = image; 
+      imageUrl = image;
     }
 
     const newMessage = new Message({
@@ -56,7 +73,60 @@ export const sendMessage = async (req, res) => {
 
     res.status(201).json(newMessage);
   } catch (error) {
-    console.error("Error in sendMessage: ", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error in sendMessage:", error.message);
+
+    res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
+
+// React to a message
+export const reactToMessage = async (req, res) => {
+  try {
+    const { id: messageId } = req.params;
+    const { emoji } = req.body;
+    const userId = req.userId;
+
+    if (!emoji) {
+      return res.status(400).json({
+        message: "Emoji is required",
+      });
+    }
+
+    const message = await Message.findById(messageId);
+
+    if (!message) {
+      return res.status(404).json({
+        message: "Message not found",
+      });
+    }
+
+    // Check if the user has already reacted
+    const existingReaction = message.reactions.find(
+      (reaction) => reaction.user.toString() === userId.toString()
+    );
+
+    if (existingReaction) {
+      existingReaction.emoji = emoji;
+    } else {
+      message.reactions.push({
+        user: userId,
+        emoji,
+      });
+    }
+
+    await message.save();
+
+    res.status(200).json({
+      message: "Reaction added successfully",
+      reactions: message.reactions,
+    });
+  } catch (error) {
+    console.error("Error in reactToMessage:", error.message);
+
+    res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
