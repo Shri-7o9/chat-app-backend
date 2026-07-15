@@ -21,7 +21,6 @@ export const generateToken = (userId, res) => {
 };
 
 
- feature/complete-merge
 export const generateVerificationToken = () => {
   const token = crypto.randomBytes(32).toString("hex");
 
@@ -47,4 +46,3 @@ export const generateSignupToken = (payload) => {
 export const verifySignupToken = (token) => {
   return jwt.verify(token, process.env.JWT_SECRET);
 };
- dev-final

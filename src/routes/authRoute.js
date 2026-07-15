@@ -24,20 +24,9 @@ router.get("/verify/:token", verifyEmail);
 router.post("/logout", protectRoute, logoutUser);
 router.put("/update-profile", protectRoute, updateUser);
 
- feature/complete-merge
 
 // Password
 router.post("/forgot-password", forgotPassword);
-
-router.put(
-  "/update-profile-pic",
-  protectRoute,
-  upload.single("profilePic"),
-  updateUser
-);
-
-
- dev-final
 router.post("/reset-password/:token", resetPassword);
 
 

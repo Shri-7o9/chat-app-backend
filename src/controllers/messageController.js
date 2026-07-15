@@ -33,9 +33,10 @@ export const getMessages = async (req, res) => {
     console.error("Error in getMessages:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
-};export const forwardMessage = async (req, res) => {
+};
+export const forwardMessage = async (req, res) => {
   try {
-    const { id: messageId } = req.params;
+    const { id: messageId } = req.params; // the original message being forwarded
     const { receiverIds } = req.body;
     const senderId = req.userId;
 
@@ -49,25 +50,49 @@ export const getMessages = async (req, res) => {
       return res.status(404).json({ error: "Original message not found" });
     }
 
-    const forwardedMessages = await Promise.all(
-      receiverIds.map((receiverId) =>
-        new Message({
-          senderId,
-          receiverId,
-          text: originalMessage.text,
-          image: originalMessage.image,
-          isForwarded: true,
-          forwardedFrom: originalMessage._id,
-        }).save()
-      )
+    // Only someone who was part of the original conversation can forward it
+    const isParticipant =
+      originalMessage.senderId.toString() === senderId ||
+      originalMessage.receiverId.toString() === senderId;
+
+    if (!isParticipant) {
+      return res.status(403).json({ error: "Not authorized to forward this message" });
+    }
+
+    // Dedupe recipients and drop the sender forwarding to themself
+    const uniqueReceiverIds = [...new Set(receiverIds.map(String))].filter(
+      (rid) => rid !== senderId
     );
-    res.status(201).json(forwardedMessages);
+
+    if (uniqueReceiverIds.length === 0) {
+      return res.status(400).json({ error: "No valid recipients to forward to" });
+    }
+
+    const forwardedDocs = uniqueReceiverIds.map((receiverId) => ({
+      senderId,
+      receiverId,
+      text: originalMessage.text,
+      image: originalMessage.image,
+      isForwarded: true,
+      forwardedFrom: originalMessage._id,
+    }));
+
+    const savedMessages = await Message.insertMany(forwardedDocs);
+
+    // Real-time delivery to each recipient who's currently online
+    const io = req.app.get("io");
+    if (io) {
+      savedMessages.forEach((msg) => {
+        io.to(msg.receiverId.toString()).emit("newMessage", msg);
+      });
+    }
+
+    res.status(201).json(savedMessages);
   } catch (error) {
     console.error("Error in forwardMessage:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 export const sendMessage = async (req, res) => {
   try {
     const { text, image } = req.body;

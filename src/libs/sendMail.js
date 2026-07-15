@@ -24,9 +24,4 @@ const sendMail = async ({ email, subject, html }) => {
   }
 };
 
- feature/complete-merge
 export default sendMail;
-
-export default sendMail;
-
-dev-final
