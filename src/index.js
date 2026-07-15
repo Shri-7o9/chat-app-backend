@@ -1,5 +1,6 @@
 import express from "express";
-import dotenv from "dotenv";
+feature/complete-merge
+import dotenv from "dotenv"; dev-final
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { createServer } from "http";
@@ -32,6 +33,7 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(cookieParser());
 
+feature/complete-merge
 
 app.use(
   cors({
@@ -40,12 +42,14 @@ app.use(
   })
 );
 
+dev-final
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
 app.use("/api/user", userRoutes); //added
 
+ feature/complete-merge
 const PORT = process.env.PORT || 5001;
 
 
@@ -57,3 +61,9 @@ connectDB().then(() => {
   server.listen(PORT, () => {
     console.log(`Server running on PORT: ${PORT}`);
   });
+
+app.listen(process.env.PORT, () => {
+    connectDB();
+  console.log(`Server running on port ${process.env.PORT}`);
+});
+dev-final
