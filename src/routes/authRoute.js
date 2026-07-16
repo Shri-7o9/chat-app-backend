@@ -11,6 +11,7 @@ import { checkAuth } from "../controllers/checkController.js";
 import { searchUsers } from "../controllers/searchController.js";
 import { addConnection } from "../controllers/addConnectionController.js";
 import { getSidebarUsers } from "../controllers/sideBarController.js";
+import { removeConnection } from "../controllers/removeConnectionController.js";
 
 const router = express.Router();
 
@@ -26,7 +27,9 @@ router.post("/forget-password", forgotPassword);
 
 router.get("/check", protectRoute, checkAuth);
 router.get('/search', protectRoute, searchUsers);
+
 router.post("/connect", protectRoute, addConnection);
+router.delete("/disconnect", protectRoute, removeConnection);
 
 // Route to get only connected users for the sidebar
 // GET /api/auth/sidebar
