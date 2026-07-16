@@ -11,8 +11,10 @@ export const checkAuth = async (req, res) => {
     res.status(200).json({
       user: {
         id: user._id,
-        fullName: `${user.firstName} ${user.lastName}`,
+        fullName: user.fullName,
+        userName: user.userName,
         email: user.email,
+        profilePic: user.profilePic,
       }
     }); 
   } catch (error) {
