@@ -25,6 +25,13 @@ const userSchema = new mongoose.Schema(
       minlength: 6,
     },
 
+    connections: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User" // References the User collection
+    }
+  ],
+
     resetPasswordToken: {
       type: String,
     },
