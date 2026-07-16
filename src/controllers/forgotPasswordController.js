@@ -44,7 +44,7 @@ export const forgotPassword = async (req, res) => {
       html: `
         <h2>Password Reset Request</h2>
 
-        <p>Hello ${user.firstName} ${user.lastName},</p>
+        <p>Hello ${user.fullName},</p>
 
         <p>You requested to reset your password.</p>
 

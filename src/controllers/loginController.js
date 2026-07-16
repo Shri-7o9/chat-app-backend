@@ -4,23 +4,23 @@ import { generateToken } from "../libs/utils.js";
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, userName, password } = req.body;
 
     // 1. Validate input
-    if (!email || !password) {
+    if (!email || !password ) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required",
+        message: "Email/userName and password are required",
       });
     }
 
     // 2. Check if user exists
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }) || await User.findOne({ userName });
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "Invalid email or password",
+        message: "Invalid email/user or password",
       });
     }
 
