@@ -3,22 +3,21 @@ import User from "../models/userModel.js";
 export const updateUser = async (req, res) => {
   try {
     const { firstName, lastName } = req.body;
+    
+    const userId = req.userId;
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.userId,
+      userId,
       {
         firstName,
         lastName,
       },
       {
-        new: true,
+        returnDocument: 'after'
       },
     );
 
-    res.status(200).json({
-      message: "User updated successfully",
-      user: updatedUser,
-    });
+    res.status(200).json(updatedUser);
   } catch (error) {
     res.status(500).json({
       message: error.message,
