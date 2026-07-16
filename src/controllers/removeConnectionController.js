@@ -1,4 +1,7 @@
 // Remove/Unfriend a user connection
+// ADD THIS LINE AT THE VERY TOP OF YOUR CONTROLLER FILE:
+import User from "../models/userModel.js"; 
+
 export const removeConnection = async (req, res) => {
   try {
     const currentUserId = req.userId || req.user?._id; // Get logged-in user safely
