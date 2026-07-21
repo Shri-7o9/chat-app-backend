@@ -1,5 +1,6 @@
 import User from "../models/userModel.js";
 import Message from "../models/messageModel.js";
+import { uploadToCloudinary } from "./userController.js";//added by pp
 
 export const getUsersForSidebar = async (req, res) => {
   try {
@@ -35,15 +36,21 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image } = req.body;
+    const { text } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.userId;
 
-    let imageUrl;
-    if (image) {
-  
-      imageUrl = image; 
-    }
+    let imageUrl = "";
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer, "chat-app/messages");
+      imageUrl = result.secure_url;
+    }//added by pp
+
+    if( !text && !imageUrl ){
+      return res.status(400).json({
+        error: "Message cannot be empty",
+      });
+    }//added by pp
 
     const newMessage = new Message({
       senderId,
@@ -54,7 +61,7 @@ export const sendMessage = async (req, res) => {
 
     await newMessage.save();
 
-    res.status(201).json(newMessage);
+    return res.status(201).json(newMessage);
   } catch (error) {
     console.error("Error in sendMessage: ", error.message);
     res.status(500).json({ error: "Internal server error" });
