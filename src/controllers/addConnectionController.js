@@ -1,9 +1,8 @@
-import User from "../models/userModel.js"; // Adjust the path based on your folder structure
+import User from "../models/userModel.js";
 
 export const addConnection = async (req, res) => {
   try {
-    // FIX: Read req.userId directly from your middleware
-    const currentUserId = req.userId; 
+    const currentUserId = req.userId;
     const { targetUserId } = req.body;
 
     if (currentUserId === targetUserId) {
@@ -11,11 +10,7 @@ export const addConnection = async (req, res) => {
     }
 
     await User.findByIdAndUpdate(currentUserId, {
-      $addToSet: { connections: targetUserId }
-    });
-
-    await User.findByIdAndUpdate(targetUserId, {
-      $addToSet: { connections: currentUserId }
+      $addToSet: { connections: targetUserId },
     });
 
     return res.status(200).json({ message: "Connection added successfully" });

@@ -6,36 +6,43 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
     userName: {
       type: String,
       required: true,
       unique: true,
     },
+
     email: {
       type: String,
       required: true,
       unique: true,
     },
+
     password: {
       type: String,
       required: true,
       minlength: 6,
     },
+
     connections: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
+
     blockedUsers: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
+
     resetPasswordToken: {
       type: String,
     },
+
     resetPasswordExpires: {
       type: Date,
     },
@@ -46,4 +53,5 @@ const userSchema = new mongoose.Schema(
 );
 
 const User = mongoose.model("User", userSchema);
+
 export default User;
