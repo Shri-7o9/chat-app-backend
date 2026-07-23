@@ -8,7 +8,15 @@ export const checkAuth = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(req.userId); 
+    res.status(200).json({
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        userName: user.userName,
+        email: user.email,
+        profilePic: user.profilePic,
+      }
+    }); 
   } catch (error) {
     console.log(error);
 

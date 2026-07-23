@@ -2,14 +2,15 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    firstName: {
+    fullName: {
       type: String,
       required: true,
     },
 
-    lastName: {
+    userName: {
       type: String,
       required: true,
+      unique: true,
     },
 
     email: {
@@ -24,6 +25,20 @@ const userSchema = new mongoose.Schema(
       minlength: 6,
     },
 
+    connections: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    blockedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
     resetPasswordToken: {
       type: String,
     },
@@ -34,11 +49,9 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-
 const User = mongoose.model("User", userSchema);
-
 
 export default User;
