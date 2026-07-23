@@ -12,6 +12,7 @@ import { searchUsers } from "../controllers/searchController.js";
 import { addConnection } from "../controllers/addConnectionController.js";
 import { getSidebarUsers } from "../controllers/sideBarController.js";
 import { removeConnection } from "../controllers/removeConnectionController.js";
+import { changePassword } from "../controllers/changePasswordController.js";
 
 const router = express.Router();
 
@@ -20,10 +21,11 @@ router.post("/signup", signup);
 router.post("/logout", protectRoute, logoutUser);
 router.put("/update-profile", protectRoute, updateUser);
 
+router.put("/change-password", protectRoute, changePassword);
+
 router.post("/reset-password/:token", resetPassword);
 router.post("/forget-password", forgotPassword);
 
-// const user = await User.findOne({ email });
 
 router.get("/check", protectRoute, checkAuth);
 router.get('/search', protectRoute, searchUsers);
