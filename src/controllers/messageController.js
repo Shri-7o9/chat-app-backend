@@ -202,7 +202,13 @@ export const reactToMessage = async (req, res) => {
       (reaction) => reaction.user.toString() === userId.toString()
     );
 
-    if (existingReaction) {
+    if (existingReaction && existingReaction.emoji === emoji) {
+      // clicking the same emoji again removes the reaction
+      message.reactions = message.reactions.filter(
+        (reaction) => reaction.user.toString() !== userId.toString()
+      );
+    } else if (existingReaction) {
+      // switching to a different emoji
       existingReaction.emoji = emoji;
     } else {
       message.reactions.push({
@@ -213,10 +219,7 @@ export const reactToMessage = async (req, res) => {
 
     await message.save();
 
-    res.status(200).json({
-      message: "Reaction added successfully",
-      reactions: message.reactions,
-    });
+    res.status(200).json(message);
   } catch (error) {
     console.error("Error in reactToMessage:", error.message);
 
@@ -326,7 +329,8 @@ export const deleteMessageForMe = async (req, res) => {
   }
 };
 
-// UNSEND — sender permanently deletes the message from the database for everyone
+// UNSEND — sender removes the message content for everyone; the message row stays
+// (so the UI can render "This message was deleted") but text/image are cleared
 // Frontend calls: DELETE /messages/unsend/:messageId
 export const unsendMessage = async (req, res) => {
   try {
@@ -343,9 +347,12 @@ export const unsendMessage = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized to unsend this message" });
     }
 
-    await Message.findByIdAndDelete(messageId);
+    message.unsent = true;
+    message.text = "";
+    message.image = "";
+    await message.save();
 
-    res.status(200).json({ _id: messageId });
+    res.status(200).json(message);
   } catch (error) {
     console.error("Error in unsendMessage:", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
