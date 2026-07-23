@@ -9,6 +9,7 @@ import {
   acceptMessageRequest,
   blockMessageRequest,
   deleteMessage,
+  forwardMessage,
 } from "../controllers/messageController.js";
 import { getSidebarUsers } from "../controllers/sideBarController.js";
 
@@ -28,6 +29,9 @@ router.post("/send/:id", protectRoute, sendMessage);
 
 // React to a message
 router.post("/react/:id", protectRoute, reactToMessage);
+
+// Forward message
+router.post("/forward", protectRoute, forwardMessage);
 
 // DELETE a message
 router.delete("/:messageId", protectRoute, deleteMessage);
