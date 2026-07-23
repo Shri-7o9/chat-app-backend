@@ -49,10 +49,10 @@ export const signup = async (req, res) => {
     try {
       await sendMail({
         email: newUser.email,
-        subject: "Welcome to ChatApp! 🎉",
+        subject: "Welcome to ChatApp!",
         html: `
           <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-            <h2 style="color: #4f46e5; text-align: center;">Welcome to ChatApp, ${fullName}! 🎉</h2>
+            <h2 style="color: #4f46e5; text-align: center;">Welcome to ChatApp, ${fullName}! </h2>
 
             <p>Hi ${fullName},</p>
 
