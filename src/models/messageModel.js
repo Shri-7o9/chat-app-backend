@@ -25,16 +25,17 @@ const messageSchema = new mongoose.Schema(
       default: "",
     },
 
+    // the message this one is replying to, if any
+    replyTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
+
     isEdited: {
        type: Boolean, 
        default: false 
       },
-
-    // true once the sender has unsent it for everyone
-    unsent: {
-      type: Boolean,
-      default: false,
-    },
 
     // per-user "delete for me" — hides the message only for these users
     deletedFor: [

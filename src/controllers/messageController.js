@@ -37,7 +37,7 @@ export const getMessages = async (req, res) => {
         },
       ],
       deletedFor: { $ne: myId }, // hide messages this user deleted-for-me
-    });
+    }).populate("replyTo", "text image senderId");
 
     res.status(200).json(messages);
   } catch (error) {
@@ -52,7 +52,7 @@ export const getMessages = async (req, res) => {
 // Send a message
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image } = req.body;
+    const { text, image, replyTo } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.userId;
 
@@ -67,9 +67,13 @@ export const sendMessage = async (req, res) => {
       receiverId,
       text,
       image: imageUrl,
+      replyTo: replyTo || null,
     });
 
     await newMessage.save();
+
+    // populate so the frontend has the quoted message's text/sender right away
+    await newMessage.populate("replyTo", "text image senderId");
 
     res.status(201).json(newMessage);
   } catch (error) {
@@ -322,8 +326,7 @@ export const deleteMessageForMe = async (req, res) => {
   }
 };
 
-// UNSEND — sender removes the message content for everyone; the message row stays
-// (so the UI can render "This message was deleted") but text/image are cleared
+// UNSEND — sender permanently deletes the message from the database for everyone
 // Frontend calls: DELETE /messages/unsend/:messageId
 export const unsendMessage = async (req, res) => {
   try {
@@ -340,12 +343,9 @@ export const unsendMessage = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized to unsend this message" });
     }
 
-    message.unsent = true;
-    message.text = "";
-    message.image = "";
-    await message.save();
+    await Message.findByIdAndDelete(messageId);
 
-    res.status(200).json(message);
+    res.status(200).json({ _id: messageId });
   } catch (error) {
     console.error("Error in unsendMessage:", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
