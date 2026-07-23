@@ -10,6 +10,7 @@ import {
   blockMessageRequest,
   deleteMessage,
   forwardMessage,
+  editMessage,
 } from "../controllers/messageController.js";
 import { getSidebarUsers } from "../controllers/sideBarController.js";
 
@@ -32,6 +33,9 @@ router.post("/react/:id", protectRoute, reactToMessage);
 
 // Forward message
 router.post("/forward", protectRoute, forwardMessage);
+
+// Edit rmessage
+router.put("/:messageId", protectRoute, editMessage);
 
 // DELETE a message
 router.delete("/:messageId", protectRoute, deleteMessage);

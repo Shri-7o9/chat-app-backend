@@ -25,6 +25,11 @@ const messageSchema = new mongoose.Schema(
       default: "",
     },
 
+    isEdited: {
+       type: Boolean, 
+       default: false 
+      },
+
     reactions: [
       {
         user: {

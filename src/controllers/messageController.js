@@ -221,6 +221,77 @@ export const reactToMessage = async (req, res) => {
   }
 };
 
+
+// FORWARD MESSAGE
+export const forwardMessage = async (req, res) => {
+  try {
+    const { messageId, targetChatId } = req.body;
+    const userId = req.userId;
+
+    // 1. Fetch original message details
+    const originalMessage = await Message.findById(messageId);
+    if (!originalMessage) {
+      return res.status(404).json({ message: "Original message not found" });
+    }
+    // 2. Create the new cloned message in the target chat
+    let forwardedMessage = await Message.create({
+      sender: userId,
+      content: originalMessage.content, // Copies text/media content
+      chat: targetChatId,
+      isForwarded: true // Useful flag for frontend UI styling
+    });
+    
+    // 3. Populate sender details for the frontend
+    forwardedMessage = await forwardedMessage.populate("sender", "name pic");
+
+    // 4. Update latestMessage in the target Chat model
+    await Chat.findByIdAndUpdate(targetChatId, {
+      latestMessage: forwardedMessage._id,
+    });
+    
+    res.status(201).json(forwardedMessage);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// EDIT MESSAGE
+export const editMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { newContent } = req.body;
+    const userId = req.userId; // Uses your exact auth assignment
+    
+    // 1. Validation check
+    if (!newContent || newContent.trim() === "") {
+      return res.status(400).json({ message: "Content cannot be empty" });
+    }
+    
+    // 2. Find the message
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+    
+    // 3. Security check: Only the sender can edit their own message
+    if (message.sender.toString() !== userId.toString()) {
+      return res.status(403).json({ message: "Unauthorized to edit this message" });
+    }
+    
+    // 4. Update the message fields
+    message.content = newContent;
+    message.isEdited = true;
+    await message.save();
+    
+    // 5. Populate sender details for frontend consistency
+    const updatedMessage = await message.populate("sender", "name pic");
+    
+    res.status(200).json(updatedMessage);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 //Delete message
 
 import Message from "../models/messageModel.js";
@@ -254,39 +325,6 @@ export const deleteMessage = async (req, res) => {
     });
 
     res.status(200).json({ message: "Message deleted successfully", messageId });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
-
-// FORWARD MESSAGE
-export const forwardMessage = async (req, res) => {
-  try {
-    const { messageId, targetChatId } = req.body;
-    const userId = req.userId;
-
-    // 1. Fetch original message details
-    const originalMessage = await Message.findById(messageId);
-    if (!originalMessage) {
-      return res.status(404).json({ message: "Original message not found" });
-    }
-    // 2. Create the new cloned message in the target chat
-    let forwardedMessage = await Message.create({
-      sender: userId,
-      content: originalMessage.content, // Copies text/media content
-      chat: targetChatId,
-      isForwarded: true // Useful flag for frontend UI styling
-    });
-
-    // 3. Populate sender details for the frontend
-    forwardedMessage = await forwardedMessage.populate("sender", "name pic");
-
-    // 4. Update latestMessage in the target Chat model
-    await Chat.findByIdAndUpdate(targetChatId, {
-      latestMessage: forwardedMessage._id,
-    });
-
-    res.status(201).json(forwardedMessage);
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
