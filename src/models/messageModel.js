@@ -16,7 +16,11 @@ const messageSchema = new mongoose.Schema(
 
     text: {
       type: String,
-      required: true,
+      // only required while the message hasn't been unsent — once unsent
+      // we blank it out, and it must be allowed to save as ""
+      required: function () {
+        return !this.unsent;
+      },
       trim: true,
     },
 
@@ -36,6 +40,13 @@ const messageSchema = new mongoose.Schema(
        type: Boolean, 
        default: false 
       },
+
+    // true once the sender has unsent it — text/image get wiped but the row stays
+    // so the UI can render "This message was deleted"
+    unsent: {
+      type: Boolean,
+      default: false,
+    },
 
     // per-user "delete for me" — hides the message only for these users
     deletedFor: [
