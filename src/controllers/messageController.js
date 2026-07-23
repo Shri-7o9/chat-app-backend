@@ -294,9 +294,6 @@ export const editMessage = async (req, res) => {
 
 //Delete message
 
-import Message from "../models/messageModel.js";
-import Chat from "../models/chatModel.js";
-
 export const deleteMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
