@@ -36,6 +36,7 @@ export const getMessages = async (req, res) => {
           receiverId: myId,
         },
       ],
+      deletedFor: { $ne: myId }, // hide messages this user deleted-for-me
     });
 
     res.status(200).json(messages);
@@ -223,106 +224,130 @@ export const reactToMessage = async (req, res) => {
 
 
 // FORWARD MESSAGE
+// Frontend calls: POST /messages/forward/:messageId  body: { toUserId }
 export const forwardMessage = async (req, res) => {
   try {
-    const { messageId, targetChatId } = req.body;
-    const userId = req.userId;
+    const { messageId } = req.params;
+    const { toUserId } = req.body;
+    const senderId = req.userId;
 
-    // 1. Fetch original message details
+    if (!toUserId) {
+      return res.status(400).json({ message: "toUserId is required" });
+    }
+
+    // 1. Fetch original message
     const originalMessage = await Message.findById(messageId);
     if (!originalMessage) {
       return res.status(404).json({ message: "Original message not found" });
     }
-    // 2. Create the new cloned message in the target chat
-    let forwardedMessage = await Message.create({
-      sender: userId,
-      content: originalMessage.content, // Copies text/media content
-      chat: targetChatId,
-      isForwarded: true // Useful flag for frontend UI styling
-    });
-    
-    // 3. Populate sender details for the frontend
-    forwardedMessage = await forwardedMessage.populate("sender", "name pic");
 
-    // 4. Update latestMessage in the target Chat model
-    await Chat.findByIdAndUpdate(targetChatId, {
-      latestMessage: forwardedMessage._id,
+    // 2. Create the new message in the target 1:1 chat (this app has no Chat model —
+    //    a "chat" is just senderId/receiverId pairs on Message)
+    const forwardedMessage = await Message.create({
+      senderId,
+      receiverId: toUserId,
+      text: originalMessage.text,
+      image: originalMessage.image,
+      forwarded: true,
     });
-    
+
     res.status(201).json(forwardedMessage);
   } catch (error) {
+    console.error("Error in forwardMessage:", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 // EDIT MESSAGE
+// Frontend calls: PUT /messages/edit/:messageId  body: { text }
 export const editMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
-    const { newContent } = req.body;
-    const userId = req.userId; // Uses your exact auth assignment
-    
+    const { text } = req.body;
+    const userId = req.userId;
+
     // 1. Validation check
-    if (!newContent || newContent.trim() === "") {
-      return res.status(400).json({ message: "Content cannot be empty" });
+    if (!text || text.trim() === "") {
+      return res.status(400).json({ message: "Text cannot be empty" });
     }
-    
+
     // 2. Find the message
     const message = await Message.findById(messageId);
     if (!message) {
       return res.status(404).json({ message: "Message not found" });
     }
-    
-    // 3. Security check: Only the sender can edit their own message
-    if (message.sender.toString() !== userId.toString()) {
+
+    // 3. Security check: only the sender can edit their own message
+    if (message.senderId.toString() !== userId.toString()) {
       return res.status(403).json({ message: "Unauthorized to edit this message" });
     }
-    
+
+    if (message.unsent) {
+      return res.status(400).json({ message: "Cannot edit an unsent message" });
+    }
+
     // 4. Update the message fields
-    message.content = newContent;
+    message.text = text;
     message.isEdited = true;
     await message.save();
-    
-    // 5. Populate sender details for frontend consistency
-    const updatedMessage = await message.populate("sender", "name pic");
-    
-    res.status(200).json(updatedMessage);
+
+    res.status(200).json(message);
   } catch (error) {
+    console.error("Error in editMessage:", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
-//Delete message
-
-export const deleteMessage = async (req, res) => {
+// DELETE FOR ME — hides the message for the requesting user only, everyone else still sees it
+// Frontend calls: DELETE /messages/delete-for-me/:messageId
+export const deleteMessageForMe = async (req, res) => {
   try {
     const { messageId } = req.params;
     const userId = req.userId;
 
-    // 1. Find the message
     const message = await Message.findById(messageId);
     if (!message) {
       return res.status(404).json({ message: "Message not found" });
     }
 
-    // 2. Security check: Only the sender can delete the message
-    if (message.sender.toString() !== userId.toString()) {
-      return res.status(403).json({ message: "Unauthorized to delete this message" });
-    }
-
-    const chatId = message.chat;
-
-    // 3. Delete the message
-    await Message.findByIdAndDelete(messageId);
-
-    // 4. Optimization: Update the latestMessage in Chat model if needed
-    const latestMessage = await Message.findOne({ chat: chatId }).sort({ createdAt: -1 });
-    await Chat.findByIdAndUpdate(chatId, {
-      latestMessage: latestMessage ? latestMessage._id : null,
+    // any participant (sender or receiver) can delete it for themselves
+    await Message.findByIdAndUpdate(messageId, {
+      $addToSet: { deletedFor: userId },
     });
 
-    res.status(200).json({ message: "Message deleted successfully", messageId });
+    res.status(200).json({ _id: messageId });
   } catch (error) {
+    console.error("Error in deleteMessageForMe:", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// UNSEND — sender removes the message content for everyone; the message row stays
+// (so the UI can render "This message was deleted") but text/image are cleared
+// Frontend calls: DELETE /messages/unsend/:messageId
+export const unsendMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const userId = req.userId;
+
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    // only the sender can unsend for everyone
+    if (message.senderId.toString() !== userId.toString()) {
+      return res.status(403).json({ message: "Unauthorized to unsend this message" });
+    }
+
+    message.unsent = true;
+    message.text = "";
+    message.image = "";
+    await message.save();
+
+    res.status(200).json(message);
+  } catch (error) {
+    console.error("Error in unsendMessage:", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };

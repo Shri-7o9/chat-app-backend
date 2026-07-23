@@ -30,6 +30,26 @@ const messageSchema = new mongoose.Schema(
        default: false 
       },
 
+    // true once the sender has unsent it for everyone
+    unsent: {
+      type: Boolean,
+      default: false,
+    },
+
+    // per-user "delete for me" — hides the message only for these users
+    deletedFor: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    // set when this message was created via the forward action
+    forwarded: {
+      type: Boolean,
+      default: false,
+    },
+
     reactions: [
       {
         user: {

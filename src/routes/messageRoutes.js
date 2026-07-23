@@ -8,7 +8,8 @@ import {
   reactToMessage,
   acceptMessageRequest,
   blockMessageRequest,
-  deleteMessage,
+  deleteMessageForMe,
+  unsendMessage,
   forwardMessage,
   editMessage,
 } from "../controllers/messageController.js";
@@ -32,12 +33,15 @@ router.post("/send/:id", protectRoute, sendMessage);
 router.post("/react/:id", protectRoute, reactToMessage);
 
 // Forward message
-router.post("/forward", protectRoute, forwardMessage);
+router.post("/forward/:messageId", protectRoute, forwardMessage);
 
-// Edit rmessage
-router.put("/:messageId", protectRoute, editMessage);
+// Edit message
+router.put("/edit/:messageId", protectRoute, editMessage);
 
-// DELETE a message
-router.delete("/:messageId", protectRoute, deleteMessage);
+// Delete a message for me only (hides it for the requester)
+router.delete("/delete-for-me/:messageId", protectRoute, deleteMessageForMe);
+
+// Unsend a message (sender removes it for everyone)
+router.delete("/unsend/:messageId", protectRoute, unsendMessage);
 
 export default router;
