@@ -220,3 +220,41 @@ export const reactToMessage = async (req, res) => {
     });
   }
 };
+
+//Delete message
+
+import Message from "../models/messageModel.js";
+import Chat from "../models/chatModel.js";
+
+export const deleteMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const userId = req.userId;
+
+    // 1. Find the message
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    // 2. Security check: Only the sender can delete the message
+    if (message.sender.toString() !== userId.toString()) {
+      return res.status(403).json({ message: "Unauthorized to delete this message" });
+    }
+
+    const chatId = message.chat;
+
+    // 3. Delete the message
+    await Message.findByIdAndDelete(messageId);
+
+    // 4. Optimization: Update the latestMessage in Chat model if needed
+    const latestMessage = await Message.findOne({ chat: chatId }).sort({ createdAt: -1 });
+    await Chat.findByIdAndUpdate(chatId, {
+      latestMessage: latestMessage ? latestMessage._id : null,
+    });
+
+    res.status(200).json({ message: "Message deleted successfully", messageId });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
