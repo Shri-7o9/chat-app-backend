@@ -8,6 +8,7 @@ import {
   reactToMessage,
   acceptMessageRequest,
   blockMessageRequest,
+  deleteMessage,
 } from "../controllers/messageController.js";
 import { getSidebarUsers } from "../controllers/sideBarController.js";
 
@@ -27,5 +28,8 @@ router.post("/send/:id", protectRoute, sendMessage);
 
 // React to a message
 router.post("/react/:id", protectRoute, reactToMessage);
+
+// DELETE a message
+router.delete("/:messageId", protectRoute, deleteMessage);
 
 export default router;
