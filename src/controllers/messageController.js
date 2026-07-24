@@ -234,7 +234,6 @@ export const reactToMessage = async (req, res) => {
 
 
 // FORWARD MESSAGE
-// Frontend calls: POST /messages/forward/:messageId  body: { toUserId }
 export const forwardMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
@@ -251,8 +250,7 @@ export const forwardMessage = async (req, res) => {
       return res.status(404).json({ message: "Original message not found" });
     }
 
-    // 2. Create the new message in the target 1:1 chat (this app has no Chat model —
-    //    a "chat" is just senderId/receiverId pairs on Message)
+    // 2. Create the new message
     const forwardedMessage = await Message.create({
       senderId,
       receiverId: toUserId,
@@ -269,7 +267,6 @@ export const forwardMessage = async (req, res) => {
 };
 
 // EDIT MESSAGE
-// Frontend calls: PUT /messages/edit/:messageId  body: { text }
 export const editMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
@@ -308,8 +305,7 @@ export const editMessage = async (req, res) => {
   }
 };
 
-// DELETE FOR ME — hides the message for the requesting user only, everyone else still sees it
-// Frontend calls: DELETE /messages/delete-for-me/:messageId
+// DELETE FOR ME 
 export const deleteMessageForMe = async (req, res) => {
   try {
     const { messageId } = req.params;

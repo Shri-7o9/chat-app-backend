@@ -10,7 +10,6 @@ export const updateUser = async (req, res) => {
     const updateData = { fullName, userName };
 
     // profilePic is expected as a base64 data URL from the client
-    // (e.g. "data:image/png;base64,....") - see frontend updateProfilePage.jsx
     if (profilePic) {
       const uploadResponse = await cloudinary.uploader.upload(profilePic, {
         folder: "chat-app-profile-pics",

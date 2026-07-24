@@ -26,19 +26,13 @@ export const forgotPassword = async (req, res) => {
     // Generate reset token
     const token = crypto.randomBytes(32).toString("hex");
 
-    // Save token and expiry time
     user.resetPasswordToken = token;
     user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
 
     await user.save({ validateBeforeSave: false });
 
-    // Reset URL
     const resetUrl = `/reset-password/${token}`;
 
-    // Respond to the client immediately - don't make them wait on the email,
-    // and only send a single response (a previous version of this code
-    // accidentally sent two responses for one request, which crashes with
-    // "headers already sent").
     res.status(200).json({
       message: "Password reset email sent successfully",
     });

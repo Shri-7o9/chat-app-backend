@@ -3,8 +3,6 @@ export const logoutUser = async (req, res) => {
         
         const isProduction = process.env.NODE_ENV === "production";
 
-        // Must match the attributes used when the cookie was set (utils.js),
-        // otherwise browsers won't actually clear it.
         res.cookie("jwt", "", {
             maxAge: 0,
             httpOnly: true,
