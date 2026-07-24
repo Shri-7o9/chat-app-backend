@@ -34,11 +34,17 @@ export const forgotPassword = async (req, res) => {
 
     // Reset URL
     const resetUrl = `/reset-password/${token}`;
-    res.status(200).json(resetUrl)
-    
 
-    // Send email
-    await sendMail({
+    // Respond to the client immediately - don't make them wait on the email,
+    // and only send a single response (a previous version of this code
+    // accidentally sent two responses for one request, which crashes with
+    // "headers already sent").
+    res.status(200).json({
+      message: "Password reset email sent successfully",
+    });
+
+    // Send email in the background - fire and forget.
+    sendMail({
       email: user.email,
       subject: "Reset Password",
       html: `
@@ -58,10 +64,8 @@ export const forgotPassword = async (req, res) => {
 
         <p>If you didn't request this, you can ignore this email.</p>
       `,
-    });
-
-    return res.status(200).json({
-      message: "Password reset email sent successfully",
+    }).catch((mailError) => {
+      console.error("Failed to send reset email:", mailError.message);
     });
 
   } catch (error) {

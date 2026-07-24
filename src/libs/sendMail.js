@@ -1,25 +1,34 @@
-import nodemailer from "nodemailer";
-
+// Uses Brevo's REST API directly via the built-in fetch (Node 18+), so no
+// extra SDK dependency is needed. https://developers.brevo.com/reference/sendtransacemail
 const sendMail = async ({ email, subject, html }) => {
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "api-key": process.env.BREVO_API_KEY,
       },
+      body: JSON.stringify({
+        sender: {
+          name: process.env.EMAIL_FROM_NAME || "ChatApp",
+          email: process.env.EMAIL_FROM,
+        },
+        to: [{ email }],
+        subject,
+        htmlContent: html,
+      }),
     });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
-      to: email,
-      subject,
-      html,
-    });
+    const data = await response.json();
 
-    console.log("Email sent successfully");
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to send email via Brevo");
+    }
+
+    console.log("Email sent successfully:", data.messageId);
   } catch (error) {
-    console.error("Email Error:", error);
+    console.error("Email Error:", error.message);
     throw error;
   }
 };

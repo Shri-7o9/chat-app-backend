@@ -45,12 +45,19 @@ export const signup = async (req, res) => {
 
     await newUser.save();
 
-    // Send welcome email
-    try {
-      await sendMail({
-        email: newUser.email,
-        subject: "Welcome to ChatApp!",
-        html: `
+    // Respond to the client immediately - don't make them wait on the email.
+    // Gmail SMTP can be slow or occasionally throttled, and blocking here risks
+    // the request timing out (e.g. a 502 from a proxy) even though signup itself
+    // succeeded.
+    res.status(201).json({
+      message: "User created successfully",
+    });
+
+    // Send welcome email in the background - fire and forget.
+    sendMail({
+      email: newUser.email,
+      subject: "Welcome to ChatApp!",
+      html: `
           <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
             <h2 style="color: #4f46e5; text-align: center;">Welcome to ChatApp, ${fullName}! </h2>
 
@@ -77,13 +84,8 @@ export const signup = async (req, res) => {
             </p>
           </div>
         `,
-      });
-    } catch (mailError) {
+    }).catch((mailError) => {
       console.error("Failed to send welcome email:", mailError.message);
-    }
-
-    res.status(201).json({
-      message: "User created successfully",
     });
 
   } catch (error) {
