@@ -19,6 +19,11 @@ const userSchema = new mongoose.Schema(
       unique: true,
     },
 
+    profilePic: {
+      type: String,
+      default: "https://res.cloudinary.com/lenvk4j3/image/upload/v1784873002/default_pic_qfxol6.jpg",
+    },
+
     password: {
       type: String,
       required: true,

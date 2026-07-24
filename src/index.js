@@ -15,7 +15,8 @@ const app = express();
 // "secure: true" cookies in production.
 app.set("trust proxy", 1);
 
-app.use(express.json());
+// Increased limit to accommodate base64-encoded profile picture uploads
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
 // Comma-separated list of allowed frontend origins, e.g.
