@@ -8,7 +8,7 @@ export const logoutUser = async (req, res) => {
         res.cookie("jwt", "", {
             maxAge: 0,
             httpOnly: true,
-            sameSite: isProduction ? "none" : "lax",
+            sameSite: "lax",
             secure: isProduction,
         });
         return res.status(200).json({

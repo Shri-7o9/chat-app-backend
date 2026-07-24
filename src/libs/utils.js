@@ -11,12 +11,12 @@ export const generateToken = (userId, res) => {
   res.cookie("jwt", token, {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true, // Prevents XSS attacks (cookie cannot be accessed via client-side JavaScript)
-    // "none" is required when the frontend and backend are on different domains
-    // (e.g. frontend on Vercel/Netlify, backend on Render). Browsers block
-    // "strict"/"lax" cookies in that cross-site setup.
-    sameSite: isProduction ? "none" : "lax",
-    // "none" cookies are only accepted by browsers when secure:true (HTTPS),
-    // which Render provides by default.
+    // Requests are proxied through Vercel (see frontend's vercel.json), so from
+    // the browser's perspective this is same-site — "lax" is sufficient and
+    // safer than "none". Only switch to "none" if you call this API directly
+    // from a different domain without a proxy in front of it.
+    sameSite: "lax",
+    // Cookie only sent over HTTPS in production; Render/Vercel are both HTTPS.
     secure: isProduction,
   });
 
