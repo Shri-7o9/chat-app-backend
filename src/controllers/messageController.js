@@ -202,7 +202,13 @@ export const reactToMessage = async (req, res) => {
       (reaction) => reaction.user.toString() === userId.toString()
     );
 
-    if (existingReaction) {
+    if (existingReaction && existingReaction.emoji === emoji) {
+      // clicking the same emoji again removes the reaction
+      message.reactions = message.reactions.filter(
+        (reaction) => reaction.user.toString() !== userId.toString()
+      );
+    } else if (existingReaction) {
+      // switching to a different emoji
       existingReaction.emoji = emoji;
     } else {
       message.reactions.push({
@@ -213,7 +219,7 @@ export const reactToMessage = async (req, res) => {
 
     await message.save();
 
-    res.status(200).json({
+     res.status(200).json({
       message: "Reaction added successfully",
       reactions: message.reactions,
     });
